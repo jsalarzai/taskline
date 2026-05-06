@@ -8,7 +8,6 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 
 TASKS_FILE = Path.home() / ".taskline.json"
 
@@ -22,7 +21,7 @@ def get_tasks_path() -> (
     return TASKS_FILE
 
 
-def load_tasks() -> List[Dict]:
+def load_tasks() -> list[dict]:
     """Load tasks from file, return empty list if missing or corrupted."""
     path = get_tasks_path()
     if not path.exists():
@@ -43,7 +42,7 @@ def load_tasks() -> List[Dict]:
         # return []
 
 
-def save_tasks(tasks: List[Dict]) -> None:
+def save_tasks(tasks: list[dict]) -> None:
     """Write the task list to the JSON file."""
     path = get_tasks_path()
     # Ensure parent directory exists (though it's home)
