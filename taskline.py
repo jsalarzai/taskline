@@ -40,14 +40,76 @@ def save_tasks(tasks: List[Dict]) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(tasks, f, indent=2, default=str)
 
-def add_task():
+# Core Task Operations
+def add_task(title: str) -> None:
+    """Add a new task with status 'todo' and current timestamp."""
+    tasks = load_tasks()
+    # Generate new ID
+    if tasks:
+        new_id = max(task["id"] for task in tasks) + 1 # Generator expression
+    else:
+        new_id = 1
 
-def list_tasks():
+    new_task = {
+        "id": new_id,
+        "title": title,
+        "status": "todo",
+        "created_at": datetime.now().isoformat(),
+    }
+    tasks.append(new_task)
+    save_tasks(tasks)
+    print(f"Task added: [{new_id}] {title}")
 
-def remove_task():
+def list_tasks() -> None:
+    """Print all tasks in a simple table."""
+    tasks = load_tasks()
+    if not tasks:
+        print("No tasks found.")
+        return
+    print(f"{'ID':<5} {'Status':<8} {'Created':<20} Title")
+    print("-" * 60)
+    for task in tasks:
+        print(
+            f"{task['id']:<5} {task['status']:<8} "
+            f"{task['created_at'][:19]:<20} {task['title']}"
+        )
 
-def done_task():
+def done_task(task_id: int) -> None:
+    """Mark a task as done."""
+    tasks = load_tasks()
+    for task in tasks:
+        if task["id"] == task_id:
+            if task["status"] == "done":
+                print(f"Task {task_id} is already marked as done.")
+                return
+            task["status"] = "done"
+            save_tasks(tasks)
+            print(f"Marked task {task_id} as done.")
+            return
+    print(f"Error: Task with id {task_id} not found.")
 
-def clear_tasks():
+def remove_task(task_id: int) -> None:
+    """Remove a task by its ID."""
+    tasks = load_tasks()
+    initial_length = len(tasks)
+    tasks = [t for t in tasks if t["id"] != task_id]
+    if len(tasks) == initial_length:
+        print(f"Error: Task with id {task_id} not found.")
+        return
+    save_tasks(tasks)
+    print(f"Removed task {task_id}.")
+
+def clear_tasks() -> None:
+    """Delete all tasks after confirmation."""
+    tasks = load_tasks()
+    if not tasks:
+        print("No tasks to clear.")
+        return
+    confirm = input("Are you sure you want to clear all tasks? (y/N): ")
+    if confirm.strip().lower() in ("y", "yes"):
+        save_tasks([])
+        print("All tasks cleared.")
+    else:
+        print("Clear cancelled.")
 
 main():
