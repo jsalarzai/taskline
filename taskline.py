@@ -14,9 +14,13 @@ TASKS_FILE = Path.home() / ".taskline.json"
 
 # File I/O Helpers
 
-def get_tasks_path() -> Path: # -> Path is the return type annotation that returns a `Path` object.
+
+def get_tasks_path() -> (
+    Path
+):  # -> Path is the return type annotation that returns a `Path` object.
     """Return the path to the JSON storage file."""
     return TASKS_FILE
+
 
 def load_tasks() -> List[Dict]:
     """Load tasks from file, return empty list if missing or corrupted."""
@@ -32,6 +36,7 @@ def load_tasks() -> List[Dict]:
     except (json.JSONDecodeError, OSError):
         return []
 
+
 def save_tasks(tasks: List[Dict]) -> None:
     """Write the task list to the JSON file."""
     path = get_tasks_path()
@@ -40,13 +45,14 @@ def save_tasks(tasks: List[Dict]) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(tasks, f, indent=2, default=str)
 
+
 # Core Task Operations
 def add_task(title: str) -> None:
     """Add a new task with status 'todo' and current timestamp."""
     tasks = load_tasks()
     # Generate new ID
     if tasks:
-        new_id = max(task["id"] for task in tasks) + 1 # Generator expression
+        new_id = max(task["id"] for task in tasks) + 1  # Generator expression
     else:
         new_id = 1
 
@@ -59,6 +65,7 @@ def add_task(title: str) -> None:
     tasks.append(new_task)
     save_tasks(tasks)
     print(f"Task added: [{new_id}] {title}")
+
 
 def list_tasks() -> None:
     """Print all tasks in a simple table."""
@@ -74,6 +81,7 @@ def list_tasks() -> None:
             f"{task['created_at'][:19]:<20} {task['title']}"
         )
 
+
 def done_task(task_id: int) -> None:
     """Mark a task as done."""
     tasks = load_tasks()
@@ -88,6 +96,7 @@ def done_task(task_id: int) -> None:
             return
     print(f"Error: Task with id {task_id} not found.")
 
+
 def remove_task(task_id: int) -> None:
     """Remove a task by its ID."""
     tasks = load_tasks()
@@ -98,6 +107,7 @@ def remove_task(task_id: int) -> None:
         return
     save_tasks(tasks)
     print(f"Removed task {task_id}.")
+
 
 def clear_tasks() -> None:
     """Delete all tasks after confirmation."""
@@ -112,4 +122,48 @@ def clear_tasks() -> None:
     else:
         print("Clear cancelled.")
 
-main():
+
+def main() -> None:
+    """Parse command-line arguments and run the appropriate function."""
+    parser = argparse.ArgumentParser(
+        description="Taskline – A simple CLI task manager.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # add
+    parser_add = subparsers.add_parser("add", help="Add a new task")
+    parser_add.add_argument("title", nargs="+", help="Title of the task")
+
+    # list
+    subparsers.add_parser("list", help="List all tasks")
+
+    # done
+    parser_done = subparsers.add_parser("done", help="Mark a task as done")
+    parser_done.add_argument("id", type=int, help="Task ID to mark as done")
+
+    # remove
+    parser_remove = subparsers.add_parser("remove", help="Remove a task")
+    parser_remove.add_argument("id", type=int, help="Task ID to remove")
+
+    # clear
+    subparsers.add_parser("clear", help="Clear all tasks")
+
+    args = parser.parse_args()
+
+    if args.command == "add":
+        title = " ".join(args.title)  # re-join multi-word title
+        add_task(title)
+    elif args.command == "list":
+        list_tasks()
+    elif args.command == "done":
+        done_task(args.id)
+    elif args.command == "remove":
+        remove_task(args.id)
+    elif args.command == "clear":
+        clear_tasks()
+    else:
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    main()
