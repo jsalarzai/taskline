@@ -33,8 +33,14 @@ def load_tasks() -> List[Dict]:
             if isinstance(data, list):
                 return data
             return []
-    except (json.JSONDecodeError, OSError):
-        return []
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"Error: Could not read tasks from {path}: {e}", file=sys.stderr)
+        print(
+            "To prevent data loss, no changes will be saved. Please fix the file manually.",
+            file=sys.stderr,
+        )
+        sys.exit(1)  # stops the program before any save happens
+        # return []
 
 
 def save_tasks(tasks: List[Dict]) -> None:
@@ -94,7 +100,8 @@ def done_task(task_id: int) -> None:
             save_tasks(tasks)
             print(f"Marked task {task_id} as done.")
             return
-    print(f"Error: Task with id {task_id} not found.")
+    print(f"Error: Task with id {task_id} not found.", file=sys.stderr)
+    sys.exit(1)
 
 
 def remove_task(task_id: int) -> None:
@@ -103,8 +110,8 @@ def remove_task(task_id: int) -> None:
     initial_length = len(tasks)
     tasks = [t for t in tasks if t["id"] != task_id]
     if len(tasks) == initial_length:
-        print(f"Error: Task with id {task_id} not found.")
-        return
+        print(f"Error: Task with id {task_id} not found.", file=sys.stderr)
+        sys.exit(1)
     save_tasks(tasks)
     print(f"Removed task {task_id}.")
 
