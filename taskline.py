@@ -14,26 +14,18 @@ TASKS_FILE = Path.home() / ".taskline.json"
 # File I/O Helpers
 
 
-def get_tasks_path() -> (
-    Path
-):  # -> Path is the return type annotation that returns a `Path` object.
-    """Return the path to the JSON storage file."""
-    return TASKS_FILE
-
-
 def load_tasks() -> list[dict]:
     """Load tasks from file, return empty list if missing or corrupted."""
-    path = get_tasks_path()
-    if not path.exists():
+    if not TASKS_FILE.exists():
         return []
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(TASKS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
                 return data
             return []
     except (json.JSONDecodeError, OSError) as e:
-        print(f"Error: Could not read tasks from {path}: {e}", file=sys.stderr)
+        print(f"Error: Could not read tasks from {TASKS_FILE}: {e}", file=sys.stderr)
         print(
             "To prevent data loss, no changes will be saved. Please fix the file manually.",
             file=sys.stderr,
@@ -44,10 +36,9 @@ def load_tasks() -> list[dict]:
 
 def save_tasks(tasks: list[dict]) -> None:
     """Write the task list to the JSON file."""
-    path = get_tasks_path()
     # Ensure parent directory exists (though it's home)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
+    TASKS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(TASKS_FILE, "w", encoding="utf-8") as f:
         json.dump(tasks, f, indent=2, default=str)
 
 
