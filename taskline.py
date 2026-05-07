@@ -47,10 +47,8 @@ def add_task(title: str) -> None:
     """Add a new task with status 'todo' and current timestamp."""
     tasks = load_tasks()
     # Generate new ID
-    if tasks:
-        new_id = max(task["id"] for task in tasks) + 1  # Generator expression
-    else:
-        new_id = 1
+
+    new_id = max((t["id"] for t in tasks), default=0) + 1
 
     new_task = {
         "id": new_id,
