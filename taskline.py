@@ -6,7 +6,7 @@
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 TASKS_FILE = Path.home() / ".taskline.json"
@@ -54,7 +54,7 @@ def add_task(title: str) -> None:
         "id": new_id,
         "title": title,
         "status": "todo",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),  # Timezone-aware UTC!
     }
     tasks.append(new_task)
     save_tasks(tasks)
