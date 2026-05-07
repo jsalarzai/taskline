@@ -39,7 +39,7 @@ def save_tasks(tasks: list[dict]) -> None:
     # Ensure parent directory exists (though it's home)
     TASKS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(TASKS_FILE, "w", encoding="utf-8") as f:
-        json.dump(tasks, f, indent=2, default=str)
+        json.dump(tasks, f, indent=2)
 
 
 # Core Task Operations
