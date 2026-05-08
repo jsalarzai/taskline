@@ -6,15 +6,24 @@
 import argparse
 import json
 import sys
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
 TASKS_FILE = Path.home() / ".taskline.json"
 
+
+# Models
+@dataclass
+class Task:
+    id: int
+    title: str
+    status: str
+    created_at: str
+
+
 # File I/O Helpers
-
-
-def load_tasks() -> list[dict]:
+def load_tasks() -> list[Task]:
     """Load tasks from file, return empty list if missing or corrupted."""
     if not TASKS_FILE.exists():
         return []
@@ -22,7 +31,7 @@ def load_tasks() -> list[dict]:
         with open(TASKS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
-                return data
+                return [Task(**item) for item in data]
             return []
     except (json.JSONDecodeError, OSError) as e:
         print(f"Error: Could not read tasks from {TASKS_FILE}: {e}", file=sys.stderr)
@@ -31,15 +40,14 @@ def load_tasks() -> list[dict]:
             file=sys.stderr,
         )
         sys.exit(1)  # stops the program before any save happens
-        # return []
 
 
-def save_tasks(tasks: list[dict]) -> None:
+def save_tasks(tasks: list[Task]) -> None:
     """Write the task list to the JSON file."""
     # Ensure parent directory exists (though it's home)
     TASKS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(TASKS_FILE, "w", encoding="utf-8") as f:
-        json.dump(tasks, f, indent=2)
+        json.dump([asdict(task) for task in tasks], f, indent=2)
 
 
 # Core Task Operations
@@ -48,14 +56,14 @@ def add_task(title: str) -> None:
     tasks = load_tasks()
     # Generate new ID
 
-    new_id = max((t["id"] for t in tasks), default=0) + 1
+    new_id = max((t.id for t in tasks), default=0) + 1
 
-    new_task = {
-        "id": new_id,
-        "title": title,
-        "status": "todo",
-        "created_at": datetime.now(UTC).isoformat(),  # Timezone-aware UTC!
-    }
+    new_task = Task(
+        id=new_id,
+        title=title,
+        status="todo",
+        created_at=datetime.now(UTC).isoformat(),  # Timezone-aware UTC!
+    )
     tasks.append(new_task)
     save_tasks(tasks)
     print(f"Task added: [{new_id}] {title}")
@@ -70,21 +78,18 @@ def list_tasks() -> None:
     print(f"{'ID':<5} {'Status':<8} {'Created':<20} Title")
     print("-" * 60)
     for task in tasks:
-        print(
-            f"{task['id']:<5} {task['status']:<8} "
-            f"{task['created_at'][:19]:<20} {task['title']}"
-        )
+        print(f"{task.id:<5} {task.status:<8} {task.created_at[:19]:<20} {task.title}")
 
 
 def done_task(task_id: int) -> None:
     """Mark a task as done."""
     tasks = load_tasks()
     for task in tasks:
-        if task["id"] == task_id:
-            if task["status"] == "done":
+        if task.id == task_id:
+            if task.status == "done":
                 print(f"Task {task_id} is already marked as done.")
                 return
-            task["status"] = "done"
+            task.status = "done"
             save_tasks(tasks)
             print(f"Marked task {task_id} as done.")
             return
@@ -96,7 +101,7 @@ def remove_task(task_id: int) -> None:
     """Remove a task by its ID."""
     tasks = load_tasks()
     initial_length = len(tasks)
-    tasks = [t for t in tasks if t["id"] != task_id]
+    tasks = [t for t in tasks if t.id != task_id]
     if len(tasks) == initial_length:
         print(f"Error: Task with id {task_id} not found.", file=sys.stderr)
         sys.exit(1)
