@@ -8,9 +8,15 @@ import json
 import sys
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 
 TASKS_FILE = Path.home() / ".taskline.json"
+
+
+class Status(StrEnum):
+    TODO = "todo"
+    DONE = "done"
 
 
 # Models
@@ -18,7 +24,7 @@ TASKS_FILE = Path.home() / ".taskline.json"
 class Task:
     id: int
     title: str
-    status: str
+    status: Status
     created_at: str
 
 
@@ -31,7 +37,9 @@ def load_tasks() -> list[Task]:
         with open(TASKS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
-                return [Task(**item) for item in data]
+                return [
+                    Task(**{**item, "status": Status(item["status"])}) for item in data
+                ]
             return []
     except (json.JSONDecodeError, OSError) as e:
         print(f"Error: Could not read tasks from {TASKS_FILE}: {e}", file=sys.stderr)
@@ -61,7 +69,7 @@ def add_task(title: str) -> None:
     new_task = Task(
         id=new_id,
         title=title,
-        status="todo",
+        status=Status.TODO,
         created_at=datetime.now(UTC).isoformat(),  # Timezone-aware UTC!
     )
     tasks.append(new_task)
@@ -78,7 +86,9 @@ def list_tasks() -> None:
     print(f"{'ID':<5} {'Status':<8} {'Created':<20} Title")
     print("-" * 60)
     for task in tasks:
-        print(f"{task.id:<5} {task.status:<8} {task.created_at[:19]:<20} {task.title}")
+        print(
+            f"{task.id:<5} {task.status.value:<8} {task.created_at[:19]:<20} {task.title}"
+        )
 
 
 def done_task(task_id: int) -> None:
@@ -86,10 +96,10 @@ def done_task(task_id: int) -> None:
     tasks = load_tasks()
     for task in tasks:
         if task.id == task_id:
-            if task.status == "done":
+            if task.status == Status.DONE:
                 print(f"Task {task_id} is already marked as done.")
                 return
-            task.status = "done"
+            task.status = Status.DONE
             save_tasks(tasks)
             print(f"Marked task {task_id} as done.")
             return
