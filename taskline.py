@@ -27,6 +27,15 @@ class Task:
     status: Status
     created_at: str
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "Task":
+        return cls(
+            id=data["id"],
+            title=data["title"],
+            status=Status(data["status"]),
+            created_at=data["created_at"],
+        )
+
 
 # File I/O Helpers
 def load_tasks() -> list[Task]:
@@ -37,9 +46,7 @@ def load_tasks() -> list[Task]:
         with open(TASKS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
-                return [
-                    Task(**{**item, "status": Status(item["status"])}) for item in data
-                ]
+                return [Task.from_dict(item) for item in data]
             return []
     except (json.JSONDecodeError, OSError) as e:
         print(f"Error: Could not read tasks from {TASKS_FILE}: {e}", file=sys.stderr)
