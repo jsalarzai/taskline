@@ -1,6 +1,5 @@
 import json
 import sys
-from dataclasses import asdict
 from pathlib import Path
 
 from taskline.models import Task
@@ -13,7 +12,7 @@ def load_tasks() -> list[Task]:
     if not TASKS_FILE.exists():
         return []
     try:
-        with open(TASKS_FILE, "r", encoding="utf-8") as f:
+        with open(TASKS_FILE, encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
                 return [Task.from_dict(item) for item in data]
@@ -32,4 +31,4 @@ def save_tasks(tasks: list[Task]) -> None:
     # Ensure parent directory exists (though it's home)
     TASKS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(TASKS_FILE, "w", encoding="utf-8") as f:
-        json.dump([asdict(task) for task in tasks], f, indent=2)
+        json.dump([task.to_dict() for task in tasks], f, indent=2)

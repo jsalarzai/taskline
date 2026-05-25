@@ -13,33 +13,26 @@ def main() -> None:
     # add
     parser_add = subparsers.add_parser("add", help="Add a new task")
     parser_add.add_argument("title", nargs="+", help="Title of the task")
+    parser_add.set_defaults(func=lambda args: add_task(" ".join(args.title)))
 
     # list
-    subparsers.add_parser("list", help="List all tasks")
+    list_parser = subparsers.add_parser("list", help="List all tasks")
+    list_parser.set_defaults(func=lambda args: list_tasks())
 
     # done
     parser_done = subparsers.add_parser("done", help="Mark a task as done")
     parser_done.add_argument("id", type=int, help="Task ID to mark as done")
+    parser_done.set_defaults(func=lambda args: done_task(args.id))
 
     # remove
     parser_remove = subparsers.add_parser("remove", help="Remove a task")
     parser_remove.add_argument("id", type=int, help="Task ID to remove")
+    parser_remove.set_defaults(func=lambda args: remove_task(args.id))
 
     # clear
-    subparsers.add_parser("clear", help="Clear all tasks")
+    clear_parser = subparsers.add_parser("clear", help="Clear all tasks")
+    clear_parser.set_defaults(func=lambda args: clear_tasks())
 
     args = parser.parse_args()
 
-    if args.command == "add":
-        title = " ".join(args.title)  # re-join multi-word title
-        add_task(title)
-    elif args.command == "list":
-        list_tasks()
-    elif args.command == "done":
-        done_task(args.id)
-    elif args.command == "remove":
-        remove_task(args.id)
-    elif args.command == "clear":
-        clear_tasks()
-    else:
-        parser.print_help()
+    args.func(args)
