@@ -1,8 +1,40 @@
 import sys
 from datetime import UTC, datetime
 
+import requests
+
+from taskline.api import TodoFetchError, fetch_todos
 from taskline.models import Status, Task
 from taskline.storage import load_tasks, save_tasks
+
+
+def import_todos(limit: int) -> None:
+    """Fetch todos from JSONPlaceholder and add them as local tasks."""
+    session = requests.Session()
+    session.headers["User-Agent"] = "taskline/0.1"
+
+    try:
+        fetched = fetch_todos(session, limit)
+    except TodoFetchError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    tasks = load_tasks()
+    next_id = max((t.id for t in tasks), default=0) + 1
+
+    for item in fetched:
+        tasks.append(
+            Task(
+                id=next_id,
+                title=item["title"],
+                status=Status.TODO,
+                created_at=datetime.now(UTC).isoformat(),
+            )
+        )
+        next_id += 1
+
+    save_tasks(tasks)
+    print(f"Imported {len(fetched)} tasks.")
 
 
 def add_task(title: str) -> None:

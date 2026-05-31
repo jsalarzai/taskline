@@ -1,6 +1,13 @@
 import argparse
 
-from taskline.commands import add_task, clear_tasks, done_task, list_tasks, remove_task
+from taskline.commands import (
+    add_task,
+    clear_tasks,
+    done_task,
+    import_todos,
+    list_tasks,
+    remove_task,
+)
 
 
 def main() -> None:
@@ -32,6 +39,15 @@ def main() -> None:
     # clear
     clear_parser = subparsers.add_parser("clear", help="Clear all tasks")
     clear_parser.set_defaults(func=lambda args: clear_tasks())
+
+    # import
+    parser_import = subparsers.add_parser(
+        "import", help="Import todos from JSONPlaceholder"
+    )
+    parser_import.add_argument(
+        "--limit", type=int, default=5, help="Number of todos to import"
+    )
+    parser_import.set_defaults(func=lambda args: import_todos(args.limit))
 
     args = parser.parse_args()
 
