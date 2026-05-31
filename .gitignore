@@ -117,6 +117,9 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# Scratch files
+scratch_*.py
+
 # Environments
 .env
 .venv
