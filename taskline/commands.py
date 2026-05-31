@@ -8,8 +8,17 @@ from taskline.models import Status, Task
 from taskline.storage import load_tasks, save_tasks
 
 
+class TaskNotFoundError(Exception):
+    pass
+
+
 def import_todos(limit: int) -> None:
-    """Fetch todos from JSONPlaceholder and add them as local tasks."""
+    """Fetch todos from JSONPlaceholder and add them as local tasks.
+
+    Note: Re-running import will create duplicates. Imported todos are
+    treated as new tasks each time; we don't track which remote ids
+    have already been imported.
+    """
     session = requests.Session()
     session.headers["User-Agent"] = "taskline/0.1"
 
