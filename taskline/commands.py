@@ -1,4 +1,3 @@
-import sys
 from datetime import UTC, datetime
 
 import requests
@@ -22,11 +21,7 @@ def import_todos(limit: int) -> None:
     session = requests.Session()
     session.headers["User-Agent"] = "taskline/0.1"
 
-    try:
-        fetched = fetch_todos(session, limit)
-    except TodoFetchError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+    fetched = fetch_todos(session, limit)
 
     tasks = load_tasks()
     next_id = max((t.id for t in tasks), default=0) + 1
@@ -90,8 +85,7 @@ def done_task(task_id: int) -> None:
             save_tasks(tasks)
             print(f"Marked task {task_id} as done.")
             return
-    print(f"Error: Task with id {task_id} not found.", file=sys.stderr)
-    sys.exit(1)
+    raise TaskNotFoundError(f"Task with id {task_id} not found.")
 
 
 def remove_task(task_id: int) -> None:
@@ -100,8 +94,7 @@ def remove_task(task_id: int) -> None:
     initial_length = len(tasks)
     tasks = [t for t in tasks if t.id != task_id]
     if len(tasks) == initial_length:
-        print(f"Error: Task with id {task_id} not found.", file=sys.stderr)
-        sys.exit(1)
+        raise TaskNotFoundError(f"Task with id {task_id} not found.")
     save_tasks(tasks)
     print(f"Removed task {task_id}.")
 
