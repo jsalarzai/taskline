@@ -1,9 +1,7 @@
 import argparse
 import sys
 
-from taskline.api import TodoFetchError
 from taskline.commands import (
-    TaskNotFoundError,
     add_task,
     clear_tasks,
     done_task,
@@ -11,6 +9,7 @@ from taskline.commands import (
     list_tasks,
     remove_task,
 )
+from taskline.errors import TaskNotFoundError, TodoFetchError
 
 
 def main() -> None:
@@ -55,9 +54,7 @@ def main() -> None:
     args = parser.parse_args()
     try:
         args.func(args)
-    except TodoFetchError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
-    except TaskNotFoundError as e:
+
+    except (TodoFetchError, TaskNotFoundError) as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
