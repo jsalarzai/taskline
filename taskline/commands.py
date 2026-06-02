@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import requests
 
-from taskline.api import TodoFetchError, fetch_todos
+from taskline.api import fetch_todos
 from taskline.models import Status, Task
 from taskline.storage import load_tasks, save_tasks
 
