@@ -2,11 +2,9 @@ from typing import Any
 
 import requests
 
+from taskline.errors import TodoFetchError
+
 BASE_URL = "https://jsonplaceholder.typicode.com"
-
-
-class TodoFetchError(Exception):
-    pass
 
 
 def _get_json(session: requests.Session, url: str, context: str) -> Any:
