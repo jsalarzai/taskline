@@ -25,7 +25,7 @@ def test_add_task_twice_produces_ids_1_and_2(task_file):
     assert tasks[1].id == 2
 
 
-def test_done_task_exits_when_task_not_found(task_file, capsys):
+def test_done_task_raises_when_task_not_found(task_file):
     with pytest.raises(TaskNotFoundError, match="not found"):
         done_task(999)
 
