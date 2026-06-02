@@ -1,6 +1,7 @@
 import pytest
 
-from taskline.commands import TaskNotFoundError, add_task, done_task, remove_task
+from taskline.commands import add_task, done_task, remove_task
+from taskline.errors import TaskNotFoundError
 from taskline.storage import load_tasks
 
 

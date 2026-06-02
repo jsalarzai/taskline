@@ -2,7 +2,8 @@ import pytest
 import requests
 import requests_mock
 
-from taskline.api import BASE_URL, TodoFetchError, fetch_todo, fetch_todos
+from taskline.api import BASE_URL, fetch_todo, fetch_todos
+from taskline.errors import TodoFetchError
 
 
 def test_fetch_todo_success():
