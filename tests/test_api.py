@@ -1,13 +1,13 @@
 import pytest
 import requests
-import requests_mock as requests_mock_lib
+import requests_mock
 
 from taskline.api import TodoFetchError, fetch_todo
 
 
 def test_fetch_todo_success():
     """fetch_todo returns parsed dict on 200."""
-    with requests_mock_lib.Mocker() as m:
+    with requests_mock.Mocker() as m:
         m.get(
             "https://jsonplaceholder.typicode.com/todos/1",
             json={"userId": 1, "id": 1, "title": "Test todo", "completed": False},
@@ -21,7 +21,7 @@ def test_fetch_todo_success():
 
 def test_fetch_todo_404():
     """fetch_todo raises TodoFetchError on 404."""
-    with requests_mock_lib.Mocker() as m:
+    with requests_mock.Mocker() as m:
         m.get(
             "https://jsonplaceholder.typicode.com/todos/999",
             status_code=404,
@@ -33,7 +33,7 @@ def test_fetch_todo_404():
 
 def test_fetch_todo_timeout():
     """fetch_todo raises TodoFetchError on timeout."""
-    with requests_mock_lib.Mocker() as m:
+    with requests_mock.Mocker() as m:
         m.get(
             "https://jsonplaceholder.typicode.com/todos/1",
             exc=requests.Timeout,
