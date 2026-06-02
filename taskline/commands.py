@@ -3,12 +3,9 @@ from datetime import UTC, datetime
 import requests
 
 from taskline.api import fetch_todos
+from taskline.errors import TaskNotFoundError
 from taskline.models import Status, Task
 from taskline.storage import load_tasks, save_tasks
-
-
-class TaskNotFoundError(Exception):
-    pass
 
 
 def import_todos(limit: int) -> None:
