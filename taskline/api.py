@@ -20,10 +20,10 @@ def _get_json(session: requests.Session, url: str, context: str) -> Any:
     except requests.HTTPError as e:
         raise TodoFetchError(f"Bad response {context}: {e}") from e
     except requests.RequestException as e:
-        raise TodoFetchError(f"Request error {context} : {e}") from e
+        raise TodoFetchError(f"Request error {context}: {e}") from e
 
 
-def fetch_todo(session: requests.Session, todo_id: int) -> dict:
+def fetch_todo(session: requests.Session, todo_id: int) -> dict[str, Any]:
     return _get_json(
         session,
         f"{BASE_URL}/todos/{todo_id}",
@@ -31,6 +31,6 @@ def fetch_todo(session: requests.Session, todo_id: int) -> dict:
     )
 
 
-def fetch_todos(session: requests.Session, limit: int) -> list[dict]:
+def fetch_todos(session: requests.Session, limit: int) -> list[dict[str, Any]]:
     data = _get_json(session, f"{BASE_URL}/todos", "fetching todos")
     return data[:limit]
