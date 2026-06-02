@@ -1,6 +1,9 @@
 import argparse
+import sys
 
+from taskline.api import TodoFetchError
 from taskline.commands import (
+    TaskNotFoundError,
     add_task,
     clear_tasks,
     done_task,
@@ -50,5 +53,11 @@ def main() -> None:
     parser_import.set_defaults(func=lambda args: import_todos(args.limit))
 
     args = parser.parse_args()
-
-    args.func(args)
+    try:
+        args.func(args)
+    except TodoFetchError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except TaskNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
