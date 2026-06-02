@@ -2,7 +2,7 @@ import pytest
 import requests
 import requests_mock
 
-from taskline.api import TodoFetchError, fetch_todo
+from taskline.api import BASE_URL, TodoFetchError, fetch_todo, fetch_todos
 
 
 def test_fetch_todo_success():
@@ -41,3 +41,18 @@ def test_fetch_todo_timeout():
         session = requests.Session()
         with pytest.raises(TodoFetchError):
             fetch_todo(session, 1)
+
+
+def test_fetch_todos_limit():
+    """fetch_todos returns only limit number of items."""
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"{BASE_URL}/todos",
+            json=[
+                {"id": i, "title": f"Todo {i}", "userId": 1, "completed": False}
+                for i in range(1, 21)
+            ],
+        )
+        session = requests.Session()
+        result = fetch_todos(session, 5)
+        assert len(result) == 5
